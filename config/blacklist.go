@@ -64,6 +64,8 @@ func BlackListInit() {
 	}
 }
 
+// BlackListAdd adds an IP or CIDR range to the blacklist with the given active life duration (in hours).
+// If activelifeDuration <= 0, a default of 24 hours is used instead of the original 666666.
 func BlackListAdd(ip string, activelifeDuration int32) (string, error) {
 	programConfigureMutex.Lock()
 	defer programConfigureMutex.Unlock()
@@ -83,8 +85,9 @@ func BlackListAdd(ip string, activelifeDuration int32) (string, error) {
 		}
 	}
 
+	// Default to 24 hours instead of the original 666666 to avoid near-permanent bans
 	if activelifeDuration <= 0 {
-		activelifeDuration = 666666
+		activelifeDuration = 24
 	}
 
 	EffectiveTimeStr := time.Now().Add(time.Hour * time.Duration(activelifeDuration)).Format("2006-01-02 15:04:05")
@@ -120,56 +123,9 @@ CONTINUECHECK:
 		programConfigure.BlackListConfigure.BlackList = DeleteBlackListlice(programConfigure.BlackListConfigure.BlackList, removeIndex)
 		goto CONTINUECHECK
 	}
-	if removeCount == 0 {
-		return nil
-	}
-	return Save()
-}
-
-func BlackListFlush(lock bool) error {
-	if lock {
-		programConfigureMutex.Lock()
-		defer programConfigureMutex.Unlock()
-	}
-
-	removeCount := 0
-
-CONTINUECHECK:
-	removeIndex := -1
-
-	for i, ipr := range programConfigure.BlackListConfigure.BlackList {
-		ipat, err := time.ParseInLocation("2006-01-02 15:04:05", ipr.EffectiveTime, time.Local)
-		if err != nil { //有效时间格式有误,当失效处理
-			removeIndex = i
-
-			break
-		}
-
-		if time.Since(ipat) > 0 {
-			removeIndex = i
-			break
-		}
-	}
-
-	if removeIndex >= 0 {
-		removeCount++
-		programConfigure.BlackListConfigure.BlackList = DeleteBlackListlice(programConfigure.BlackListConfigure.BlackList, removeIndex)
-		goto CONTINUECHECK
-	}
 
 	if removeCount == 0 {
-		return nil
+		return fmt.Errorf("未找到对应IP: %s", ip)
 	}
 	return Save()
-}
-
-func DeleteBlackListlice(a []BlackListItem, deleteIndex int) []BlackListItem {
-	j := 0
-	for i := range a {
-		if i != deleteIndex {
-			a[j] = a[i]
-			j++
-		}
-	}
-	return a[:j]
 }
