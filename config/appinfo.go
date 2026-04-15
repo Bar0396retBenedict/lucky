@@ -22,7 +22,8 @@ func GetAppInfo() *AppInfo {
 }
 
 func InitAppInfo(version, date string) {
-	appInfo.AppName = "Lucky"
+	// Using a custom app name for my personal fork
+	appInfo.AppName = "Lucky-Personal"
 	appInfo.Version = version
 	appInfo.Date = date
 	appInfo.OS = runtime.GOOS
