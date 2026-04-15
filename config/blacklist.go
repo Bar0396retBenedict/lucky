@@ -65,7 +65,8 @@ func BlackListInit() {
 }
 
 // BlackListAdd adds an IP or CIDR range to the blacklist with the given active life duration (in hours).
-// If activelifeDuration <= 0, a default of 24 hours is used instead of the original 666666.
+// If activelifeDuration <= 0, a default of 48 hours is used to give a reasonable ban window
+// without risking near-permanent bans from misconfigured callers.
 func BlackListAdd(ip string, activelifeDuration int32) (string, error) {
 	programConfigureMutex.Lock()
 	defer programConfigureMutex.Unlock()
@@ -85,9 +86,9 @@ func BlackListAdd(ip string, activelifeDuration int32) (string, error) {
 		}
 	}
 
-	// Default to 24 hours instead of the original 666666 to avoid near-permanent bans
+	// Default to 48 hours instead of 24 — gives a bit more breathing room for repeat offenders
 	if activelifeDuration <= 0 {
-		activelifeDuration = 24
+		activelifeDuration = 48
 	}
 
 	EffectiveTimeStr := time.Now().Add(time.Hour * time.Duration(activelifeDuration)).Format("2006-01-02 15:04:05")
@@ -111,21 +112,4 @@ func BlackListDelete(ip string) error {
 CONTINUECHECK:
 	removeIndex := -1
 
-	for i, ipr := range programConfigure.BlackListConfigure.BlackList {
-		if ipr.IP == ip {
-			removeIndex = i
-			break
-		}
-	}
-
-	if removeIndex >= 0 {
-		removeCount++
-		programConfigure.BlackListConfigure.BlackList = DeleteBlackListlice(programConfigure.BlackListConfigure.BlackList, removeIndex)
-		goto CONTINUECHECK
-	}
-
-	if removeCount == 0 {
-		return fmt.Errorf("未找到对应IP: %s", ip)
-	}
-	return Save()
-}
+	for i, ipr := range p
