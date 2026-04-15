@@ -1,6 +1,7 @@
 FROM scratch
 COPY lucky /
 EXPOSE 16601
-WORKDIR /goodluck
+# Using /data for persistent config storage
+WORKDIR /data
 ENTRYPOINT ["/lucky"]
-CMD ["-c", "/goodluck/lucky.conf"]
+CMD ["-c", "/data/lucky.conf"]
