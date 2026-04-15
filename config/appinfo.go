@@ -27,15 +27,13 @@ func InitAppInfo(version, date string) {
 	appInfo.Date = date
 	appInfo.OS = runtime.GOOS
 	appInfo.ARCH = runtime.GOARCH
-	appInfo.RunTime = time.Now().Format("2006-01-02 15:04:05")
+	// Record the startup time in a human-readable local format
+	appInfo.RunTime = time.Now().Local().Format("2006-01-02 15:04:05")
 	appInfo.GoVersion = runtime.Version()
-
-	time.Now().Format("2006-01-02T15:04:05Z")
 
 	buildTime, err := time.Parse("2006-01-02T15:04:05Z", date)
 	if err != nil {
 		return
 	}
 	appInfo.Date = buildTime.Local().Format("2006-01-02 15:04:05")
-
 }
